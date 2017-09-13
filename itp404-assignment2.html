@@ -1,0 +1,261 @@
+<html>
+<link href="https://fonts.googleapis.com/css?family=Arvo|Roboto" rel="stylesheet">
+
+<script src="jquery-3.2.1.js">
+
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.10/handlebars.js">
+
+
+</script>
+
+<style>
+    .loader,
+    .loader:before,
+    .loader:after {
+        background: #4c4c4c;
+        -webkit-animation: load1 1s infinite ease-in-out;
+        animation: load1 1s infinite ease-in-out;
+        width: 1em;
+        height: 4em;
+    }
+    
+    .loader {
+        color: #4c4c4c;
+        text-indent: -9999em;
+        margin: 88px auto;
+/*        margin-top: 20%;*/
+/*        margin-left: 40%;*/
+        position: relative;
+        font-size: 11px;
+        -webkit-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-animation-delay: -0.16s;
+        animation-delay: -0.16s;
+    }
+    
+    .loader:before,
+    .loader:after {
+        position: absolute;
+        top: 0;
+        content: '';
+    }
+    
+    .loader:before {
+        left: -1.5em;
+        -webkit-animation-delay: -0.32s;
+        animation-delay: -0.32s;
+    }
+    
+    .loader:after {
+        left: 1.5em;
+    }
+    
+    @-webkit-keyframes load1 {
+        0%,
+        80%,
+        100% {
+            box-shadow: 0 0;
+            height: 4em;
+        }
+        40% {
+            box-shadow: 0 -2em;
+            height: 5em;
+        }
+    }
+    
+    @keyframes load1 {
+        0%,
+        80%,
+        100% {
+            box-shadow: 0 0;
+            height: 4em;
+        }
+        40% {
+            box-shadow: 0 -2em;
+            height: 5em;
+        }
+    }
+    
+    #heading {
+        text-align: center;
+        font-size: 72pt;
+        margin-top: 15%;
+        font-family: 'Arvo', serif;
+    }
+    
+    #subhead {
+        font-size: 12pt;
+        text-align: center;
+        font-family: 'Arvo', serif;
+        font-style: italic;
+        margin-top: -0.5%;
+        color: darkgrey;
+    }
+    
+    .reddit {
+        margin-left: 10%;
+        font-family: 'Roboto', sans-serif;
+        margin-bottom: 2em;
+        
+    }
+    
+    a:link{
+        color: firebrick;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    
+    #thesearchbar {
+        margin-top: 2em;
+        text-align: center;
+        margin-bottom: 4em;
+    }
+    
+    input {
+        height: 2.5em;
+        line-height: 2.5em;
+        font-size: 1em;
+        width: 40em;
+        border-radius: 5%;
+    }
+    
+    button {
+        height: 2.5em;
+        font-size: 1em;
+        border-radius: 5%;
+        color: antiquewhite;
+        background-color: #DC143C;
+        width: 7em;
+        border-style: solid;
+        border: none;
+    }
+    
+    #score {
+        color: darkgrey;
+        margin-top: -10px;
+        font-size: 10pt;
+        display: inline;
+    }
+
+    #title{
+        
+    }
+    
+    .comments{
+        font-size:10pt;
+        margin-top: -10px;
+        color: slategrey;
+        display: inline;
+   
+    }
+    
+    #spacer{
+        display: inline;
+        margin-right: 2em;
+        margin-left: 2em;
+        color: lightgrey;
+    }
+    
+    #error{
+        font-size: 3em;
+        text-align: center;
+        color: indianred;
+        margin: 2em;
+        font-family: 'Roboto', sans-serif;
+        font-weight: bold;
+    }
+    
+</style>
+
+
+
+<body>
+
+<div id="heading"> Reddit </div>
+    <div id="subhead"> search for a subreddit </div>
+    
+    
+    <form id="thesearchbar">
+        <input type="text" id="searchterm">
+        <button type="button" id="fetch"> Search </button>
+    </form>
+    
+    <div id="reddit-content">
+        
+    </div>
+
+
+    <template id="reddit-template" type="text/x-handlebars-template">
+        {{#each reddit_content}}
+    <div class="reddit">
+        
+      <p id="title"> 
+        <a href="{{data.url}}"> 
+          {{data.title}}
+          </a> </p>
+           
+    {{#if data.num_comments}}
+        <p class="comments"> {{data.num_comments}} comments </p>
+      {{else}}
+       <p class="comments"> No comments </p>
+        {{/if}}
+       <p id="spacer"> | </p>
+         <p id="score"> 
+                Score: {{data.score}}
+          </p>
+        </div>
+    {{/each}}
+    </template>
+
+    
+    
+    <script>
+
+        var searchbutton = document.getElementById('fetch');
+
+        
+        
+      
+
+        searchbutton.addEventListener('click', function() {
+            
+             
+                    document.querySelector("#reddit-content").innerHTML =  '<div class="loader"> Loading... </div>';
+                    document.getElementById("heading").style.marginTop = "3%";
+
+         setTimeout(function() {
+            var searchvalue = $('#searchterm').val();
+            $.getJSON('https://www.reddit.com/r/' + searchvalue + '.json').then(function(results) {
+                var data = results.data.children;
+                
+               
+                 document.querySelector("#subhead").innerHTML = searchvalue;
+                
+                 var template = document.getElementById('reddit-template').innerHTML;
+            var renderData = Handlebars.compile(template);
+            document.getElementById('reddit-content').innerHTML = renderData({
+                reddit_content: data
+            });
+                
+                
+                console.log(results);
+          
+                
+                }, function() {
+                document.querySelector("#reddit-content").innerHTML = "<div id='error'> Oops! Something went wrong! </div>";
+            });
+        
+    }, 500);
+
+        });
+          
+
+    </script>
+
+</body>
+
+</html>
